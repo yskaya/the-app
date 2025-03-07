@@ -1,0 +1,16 @@
+{
+  "projects": {
+    "grpc-clients": {
+      "type": "library",
+      "root": "libs/grpc-clients",
+      "entryFile": "index",
+      "sourceRoot": "libs/grpc-clients/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/grpc-clients/tsconfig.lib.json"
+      }
+    }
+  },
+  "compilerOptions": {
+    "webpack": true
+  }
+}
