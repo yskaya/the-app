@@ -22,7 +22,7 @@ export class TokensService {
 
   async validateAccessToken(accessToken: string): Promise<TokenValidationResponse> {
     if (!accessToken) {
-      throw new Error('No token token provided');
+      throw new UnauthorizedException('No token provided');
     }
 
     try {

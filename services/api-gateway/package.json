@@ -15,6 +15,7 @@
     "cookie-parser": "^1.4.7",
     "jsonwebtoken": "^9.0.0",
     "@paypay/redis": "*",
+    "@paypay/common": "*",
     "express-rate-limit": "^7.1.5",
     "express-slow-down": "^2.0.1"
   },

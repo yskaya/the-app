@@ -33,20 +33,45 @@ export class AuthService {
       throw new UnauthorizedException('Invalid Google credentials');
     }
 
-    // Call users service via HTTP
-    const verifyResponse = await axios.post('http://localhost:5002/api/users/verify-email', { email: payload.email });
-    const verifiedUser = verifyResponse.data.user;
+    // Call users service via HTTP with error handling
+    let verifiedUser;
+    try {
+      const verifyResponse = await axios.post('http://localhost:5002/api/users/verify-email', { 
+        email: payload.email 
+      });
+      verifiedUser = verifyResponse.data.user;
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        // User not found, create new user
+        try {
+          const createResponse = await axios.post('http://localhost:5002/api/users/create', {
+            id: payload.sub,
+            email: payload.email,
+            firstName: payload.given_name ?? '',
+            lastName: payload.family_name ?? '',
+            role: 'user',
+          });
+          return { user: createResponse.data.user };
+        } catch (createError) {
+          throw new Error('Failed to create user account');
+        }
+      }
+      throw new Error('User service unavailable');
+    }
 
     if (!verifiedUser) {
-      const createResponse = await axios.post('http://localhost:5002/api/users/create', {
-        id: payload.sub,
-        email: payload.email,
-        firstName: payload.given_name ?? '',
-        lastName: payload.family_name ?? '',
-        role: 'user',
-      });
-
-      return { user: createResponse.data.user };
+      try {
+        const createResponse = await axios.post('http://localhost:5002/api/users/create', {
+          id: payload.sub,
+          email: payload.email,
+          firstName: payload.given_name ?? '',
+          lastName: payload.family_name ?? '',
+          role: 'user',
+        });
+        return { user: createResponse.data.user };
+      } catch (createError) {
+        throw new Error('Failed to create user account');
+      }
     }
 
     return { user: verifiedUser };
