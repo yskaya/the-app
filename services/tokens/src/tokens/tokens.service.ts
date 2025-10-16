@@ -76,4 +76,23 @@ export class TokensService {
 
     return { accessToken: newAccessToken, refreshToken: newRefreshToken };
   }
+
+  async invalidateToken(token: string): Promise<{ success: boolean }> {
+    try {
+      const userId = Helpers.extractIdFromToken({ refreshToken: token });
+      
+      if (!userId) {
+        return { success: false };
+      }
+
+      // Remove all tokens for this user from Redis
+      await this.redisService.del(`refresh_token:${userId}`);
+      await this.redisService.del(`cached_access_token:${userId}`);
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Token invalidation failed:', error);
+      return { success: false };
+    }
+  }
 }

@@ -2,6 +2,7 @@ import cookieParser from 'cookie-parser';
 import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions } from '@nestjs/microservices';
 import { AppModule } from './app.module';
+const rateLimit = require('express-rate-limit');
 
 const DEFAULT_PORT = 5002;
 const DEFAULT_FRONTEND = 'http://localhost:3000';
@@ -11,6 +12,20 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.setGlobalPrefix('api'); 
+
+  // Rate limiting for users endpoints
+  const usersLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 200, // 200 requests per window
+    message: {
+      error: 'Too Many Requests',
+      message: 'Rate limit exceeded, please try again later.',
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+  
+  app.use('/api/users', usersLimiter);
 
   app.enableCors({
     origin: [process.env.FRONTEND_URL || DEFAULT_FRONTEND],

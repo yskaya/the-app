@@ -12,7 +12,9 @@
   },
   "dependencies": {
     "axios": "^0.26.0",
-    "google-auth-library": "^8.0.0"
+    "google-auth-library": "^8.0.0",
+    "cookie-parser": "^1.4.6",
+    "express-rate-limit": "^7.1.5"
   },
   "license": "MIT"
 }

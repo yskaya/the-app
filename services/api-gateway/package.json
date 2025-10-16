@@ -14,7 +14,9 @@
     "axios": "^0.26.0",
     "cookie-parser": "^1.4.7",
     "jsonwebtoken": "^9.0.0",
-    "@paypay/redis": "*"
+    "@paypay/redis": "*",
+    "express-rate-limit": "^7.1.5",
+    "express-slow-down": "^2.0.1"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.8",

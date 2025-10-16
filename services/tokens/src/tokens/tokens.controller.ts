@@ -19,4 +19,9 @@ export class TokensController {
   public async generateTokens(@Body() body: { userId: string }): Promise<{ accessToken: string; refreshToken: string }> {
     return this.tokensService.generateTokens(body.userId);
   }
+
+  @Post('invalidate')
+  public async invalidateToken(@Body() body: { token: string }): Promise<{ success: boolean }> {
+    return this.tokensService.invalidateToken(body.token);
+  }
 }

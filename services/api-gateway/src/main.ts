@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import * as cookieParser from 'cookie-parser';
+const cookieParser = require('cookie-parser');
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
@@ -15,7 +15,13 @@ async function bootstrap() {
   app.use(cookieParser());
   app.enableCors({
     origin: [process.env.FRONTEND_URL || DEFAULT_FRONTEND],
-    credentials: true, 
+    credentials: true,
+    exposedHeaders: [
+      'X-RateLimit-Limit',
+      'X-RateLimit-Remaining', 
+      'X-RateLimit-Reset',
+      'Set-Cookie'
+    ]
   });
 
   app.use((req: Request, res: Response, next: NextFunction) => {

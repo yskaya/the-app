@@ -29,10 +29,18 @@ export class AuthController {
   @Post('logout')
   async logout(@Req() req: Request, @Res() res: Response) {
     console.log('!!!!!!!! Auth.logout !!!!!!!')
-    // const refreshToken = req.cookies.refresh_token;
-    // if (refreshToken) {
-    //   await this.authService.logout(refreshToken);
-    // }
+    const refreshToken = req.cookies?.refresh_token;
+    
+    if (refreshToken) {
+      try {
+        // Invalidate tokens in Redis
+        await axios.post('http://localhost:5003/api/tokens/invalidate', { token: refreshToken });
+      } catch (error) {
+        console.error('Token invalidation failed:', error);
+        // Continue with logout even if invalidation fails
+      }
+    }
+    
     res.clearCookie('access_token');
     res.clearCookie('refresh_token');
     return res.status(200).json({ message: 'Logged out' });

@@ -15,7 +15,8 @@
   "dependencies": {
     "@paypay/prisma": "*",
     "@paypay/redis": "*",
-    "@prisma/client": "^6.5.0"
+    "@prisma/client": "^6.5.0",
+    "express-rate-limit": "^7.1.5"
   },
   "license": "MIT",
   "devDependencies": {

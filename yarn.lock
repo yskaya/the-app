@@ -1206,7 +1206,7 @@ content-type@^1.0.5, content-type@~1.0.4, content-type@~1.0.5:
   resolved "https://registry.yarnpkg.com/content-type/-/content-type-1.0.5.tgz#8b773162656d1d1086784c8f23a54ce6d73d7918"
   integrity sha512-nTjqfcBFEipKdXCv4YDQWCfmcLZKm81ldF0pAopTvyrFGVbcR6P/VAAd5G7N+0tTr8QqiU0tFadD6FK4NtJwOA==
 
-cookie-parser@^1.4.7:
+cookie-parser@^1.4.6, cookie-parser@^1.4.7:
   version "1.4.7"
   resolved "https://registry.yarnpkg.com/cookie-parser/-/cookie-parser-1.4.7.tgz#e2125635dfd766888ffe90d60c286404fa0e7b26"
   integrity sha512-nGUvgXnotP3BsjiLX2ypbQnWoGUPIIfHQNZkkC668ntrzGWEZVW70HDEB1qnNGMicPje6EttlIgzo51YSwNQGw==
@@ -1489,6 +1489,18 @@ events@^3.2.0:
   version "3.3.0"
   resolved "https://registry.yarnpkg.com/events/-/events-3.3.0.tgz#31a95ad0a924e2d2c419a813aeb2c4e878ea7400"
   integrity sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==
+
+express-rate-limit@7, express-rate-limit@^7.1.5:
+  version "7.5.1"
+  resolved "https://registry.yarnpkg.com/express-rate-limit/-/express-rate-limit-7.5.1.tgz#8c3a42f69209a3a1c969890070ece9e20a879dec"
+  integrity sha512-7iN8iPMDzOMHPUYllBEsQdWVB6fPDMPqwjBaFrgr4Jgr/+okjvzAy+UHlYYL/Vs0OsOrMkwS6PJDkFlJwoxUnw==
+
+express-slow-down@^2.0.1:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/express-slow-down/-/express-slow-down-2.1.0.tgz#79182d6c2136db62ac3ee79ae9c44f9ad53b6042"
+  integrity sha512-tQ/ItTDbGfo+fLS+jxu19vgYOgZk7wyOakuAsnzl8f7HmxG3ynWAoo136+oqB+rqHCk3QyM6VoXL03qA5a4gVQ==
+  dependencies:
+    express-rate-limit "7"
 
 express@5.1.0:
   version "5.1.0"

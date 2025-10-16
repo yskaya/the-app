@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { RedisModule } from '@paypay/redis';
 import { createAuthMiddleware } from './auth.middleware';
 import { ProxyMiddleware } from './proxy.middleware';
+import { RateLimitMiddleware } from './rate-limit.middleware';
 
 @Module({
   imports: [
@@ -11,10 +12,15 @@ import { ProxyMiddleware } from './proxy.middleware';
       isGlobal: true,
     }),
   ],
-  providers: [ProxyMiddleware],
+  providers: [ProxyMiddleware, RateLimitMiddleware],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
+    // Rate limiting first (before auth)
+    consumer
+      .apply(RateLimitMiddleware)
+      .forRoutes('*');
+
     consumer
       .apply(createAuthMiddleware())
       .forRoutes('*');
