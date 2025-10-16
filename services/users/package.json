@@ -13,7 +13,6 @@
     "prisma:migrate": "npx prisma migrate dev --name init"
   },
   "dependencies": {
-    "@paypay/grpc-clients": "*",
     "@paypay/prisma": "*",
     "@paypay/redis": "*",
     "@prisma/client": "^6.5.0"

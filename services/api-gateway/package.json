@@ -13,11 +13,12 @@
   "dependencies": {
     "axios": "^0.26.0",
     "cookie-parser": "^1.4.7",
-    "@paypay/grpc-clients": "*",
+    "jsonwebtoken": "^9.0.0",
     "@paypay/redis": "*"
   },
   "devDependencies": {
-    "@types/cookie-parser": "^1.4.8"
+    "@types/cookie-parser": "^1.4.8",
+    "@types/jsonwebtoken": "^9.0.0"
   },
   "license": "MIT"
 }

@@ -1,25 +1,22 @@
-import { Controller } from '@nestjs/common';
-import { GrpcMethod } from '@nestjs/microservices';
-import { GRPC_TOKENS_SERVICE_NAME } from '@paypay/grpc-clients';
-import type { Tokens, TokenMessage, TokenValidationResponse, UserIdMessage } from '@paypay/grpc-clients';
+import { Controller, Post, Body } from '@nestjs/common';
 import { TokensService } from './tokens.service';
 
-@Controller()
+@Controller('tokens')
 export class TokensController {
   constructor(private readonly tokensService: TokensService) {}
 
-  @GrpcMethod(GRPC_TOKENS_SERVICE_NAME, 'ValidateAccessToken')
-  public async validateAccessToken({ token }: TokenMessage): Promise<TokenValidationResponse> {
-    return this.tokensService.validateAccessToken(token);
+  @Post('validate')
+  public async validateAccessToken(@Body() body: { token: string }): Promise<{ valid: boolean; userId?: string }> {
+    return this.tokensService.validateAccessToken(body.token);
   }
 
-  @GrpcMethod(GRPC_TOKENS_SERVICE_NAME, 'RotateTokens')
-  public async rotateTokens({ token }: TokenMessage): Promise<Tokens> {
-    return this.tokensService.rotateTokens(token);
+  @Post('rotate')
+  public async rotateTokens(@Body() body: { token: string }): Promise<{ accessToken: string; refreshToken: string }> {
+    return this.tokensService.rotateTokens(body.token);
   }
 
-  @GrpcMethod(GRPC_TOKENS_SERVICE_NAME, 'GenerateTokens')
-  public async generateTokens({ userId }: UserIdMessage): Promise<Tokens> {
-    return this.tokensService.generateTokens(userId);
+  @Post('generate')
+  public async generateTokens(@Body() body: { userId: string }): Promise<{ accessToken: string; refreshToken: string }> {
+    return this.tokensService.generateTokens(body.userId);
   }
 }

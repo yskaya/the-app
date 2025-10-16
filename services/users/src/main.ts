@@ -1,7 +1,6 @@
 import cookieParser from 'cookie-parser';
 import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions } from '@nestjs/microservices';
-import { GRPC_USERS_CONFIG } from '@paypay/grpc-clients';
 import { AppModule } from './app.module';
 
 const DEFAULT_PORT = 5002;
@@ -22,11 +21,7 @@ async function bootstrap() {
 
   console.log(`REST API running on http://localhost:${REST_PORT}`);
 
-  app.connectMicroservice<MicroserviceOptions>(
-    GRPC_USERS_CONFIG as MicroserviceOptions
-  );
-
-  await app.startAllMicroservices();
+  // gRPC disabled for simplicity in local dev
 }
 
 bootstrap();

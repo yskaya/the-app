@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import cookieParser from 'cookie-parser';
+import * as cookieParser from 'cookie-parser';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 

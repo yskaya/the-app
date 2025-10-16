@@ -1,16 +1,14 @@
 import { OAuth2Client } from 'google-auth-library';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { GrpcTokensService, GrpcUsersService } from '@paypay/grpc-clients';
+import axios from 'axios';
 
 @Injectable()
 export class AuthService {
   private googleClient: OAuth2Client;
 
   constructor(
-    private readonly configService: ConfigService,
-    private readonly grpcTokensService: GrpcTokensService,
-    private readonly grpcUsersService: GrpcUsersService
+    private readonly configService: ConfigService
   ) {
     this.googleClient = new OAuth2Client(
       this.configService.get<string>('GOOGLE_CLIENT_ID'),
@@ -35,10 +33,12 @@ export class AuthService {
       throw new UnauthorizedException('Invalid Google credentials');
     }
 
-    const { user: verifiedUser } = await this.grpcUsersService.verifyEmail({ email: payload.email });
+    // Call users service via HTTP
+    const verifyResponse = await axios.post('http://localhost:5002/api/users/verify-email', { email: payload.email });
+    const verifiedUser = verifyResponse.data.user;
 
     if (!verifiedUser) {
-      const { user: newUser } = await this.grpcUsersService.createUser({
+      const createResponse = await axios.post('http://localhost:5002/api/users/create', {
         id: payload.sub,
         email: payload.email,
         firstName: payload.given_name ?? '',
@@ -46,7 +46,7 @@ export class AuthService {
         role: 'user',
       });
 
-      return { user: newUser };
+      return { user: createResponse.data.user };
     }
 
     return { user: verifiedUser };

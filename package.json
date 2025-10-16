@@ -3,13 +3,12 @@
   "workspaces": {
     "packages": [
       "packages/*",
-      "services/*",
-      "api-gateway"
+      "services/*"
     ]
   },
   "scripts": {
     "clean": "rm -rf node_modules && rm -f yarn.lock package-lock.json",
-    "clean:all": "yarn clean && find services packages api-gateway -type d -name node_modules -prune -exec rm -rf '{}' + && find services packages api-gateway -type f -name yarn.lock -exec rm -f '{}' + && find services packages api-gateway -type f -name package-lock.json -exec rm -f '{}' +",
+    "clean:all": "yarn clean && find services packages -type d -name node_modules -prune -exec rm -rf '{}' + && find services packages -type f -name yarn.lock -exec rm -f '{}' + && find services packages -type f -name package-lock.json -exec rm -f '{}' +",
     "build": "yarn workspaces run build",
     "start:gateway": "yarn workspace api-gateway start",
     "start:auth": "yarn workspace auth start",

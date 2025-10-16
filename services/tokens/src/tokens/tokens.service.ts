@@ -1,8 +1,17 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import type { Tokens, TokenValidationResponse } from '@paypay/grpc-clients';
 import { RedisService } from '@paypay/redis';
 import * as Helpers from './tokens.helper';
+
+interface Tokens {
+  accessToken: string;
+  refreshToken: string;
+}
+
+interface TokenValidationResponse {
+  valid: boolean;
+  userId?: string;
+}
 
 @Injectable()
 export class TokensService {
