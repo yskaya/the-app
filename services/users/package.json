@@ -1,0 +1,25 @@
+{
+  "name": "users",
+  "version": "1.0.0",
+  "description": "Users Service",
+  "main": "dist/main.js",
+  "scripts": {
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "build": "nest build",
+    "clean": "rm -rf node_modules yarn.lock dist",
+    "reset": "yarn clean && yarn install && yarn build",
+    "prisma:generate": "npx prisma generate",
+    "prisma:migrate": "npx prisma migrate dev --name init"
+  },
+  "dependencies": {
+    "@paypay/grpc-clients": "*",
+    "@paypay/prisma": "*",
+    "@paypay/redis": "*",
+    "@prisma/client": "^6.5.0"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "prisma": "^6.5.0"
+  }
+}

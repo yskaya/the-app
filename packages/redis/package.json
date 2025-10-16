@@ -1,0 +1,19 @@
+{
+  "name": "@paypay/redis",
+  "version": "1.0.0",
+  "description": "Shared Redis module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc --project tsconfig.json"
+  },
+  "dependencies": {
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "ioredis": "^5.6.0"
+  },
+  "license": "MIT"
+}

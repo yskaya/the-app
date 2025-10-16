@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package tokens;
+
+service GrpcTokensService {
+  rpc ValidateAccessToken (TokenRequest) returns (TokenValidationResponse);
+  rpc RotateTokens (TokenRequest) returns (Tokens);
+  rpc GenerateTokens (UserIdRequest) returns (Tokens);
+}
+
+message TokenRequest {
+  string token = 1;
+}
+
+message UserIdRequest {
+  string userId = 1;
+}
+
+message TokenValidationResponse {
+  bool valid = 1;
+  optional string userId = 2;
+}
+
+message Tokens {
+  string accessToken = 1;
+  string refreshToken = 2;
+}

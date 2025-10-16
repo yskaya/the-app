@@ -1,0 +1,19 @@
+{
+  "name": "@paypay/prisma",
+  "version": "1.0.0",
+  "description": "Shared Prisma module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc --project tsconfig.json"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.5.0",
+    "@prisma/engines": "^6.5.0",
+    "prisma": "^6.5.0"
+  },
+  "license": "MIT"
+}

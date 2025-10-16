@@ -1,0 +1,23 @@
+{
+  "name": "api-gateway",
+  "version": "1.0.0",
+  "description": "PayPay API Gateway",
+  "main": "dist/main.js",
+  "scripts": {
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "build": "nest build",
+    "clean": "rm -rf node_modules yarn.lock dist",
+    "reset": "yarn clean && yarn install && yarn build"
+  },
+  "dependencies": {
+    "axios": "^0.26.0",
+    "cookie-parser": "^1.4.7",
+    "@paypay/grpc-clients": "*",
+    "@paypay/redis": "*"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.8"
+  },
+  "license": "MIT"
+}

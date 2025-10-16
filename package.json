@@ -1,0 +1,39 @@
+{
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "packages/*",
+      "services/*",
+      "api-gateway"
+    ]
+  },
+  "scripts": {
+    "clean": "rm -rf node_modules && rm -f yarn.lock package-lock.json",
+    "clean:all": "yarn clean && find services packages api-gateway -type d -name node_modules -prune -exec rm -rf '{}' + && find services packages api-gateway -type f -name yarn.lock -exec rm -f '{}' + && find services packages api-gateway -type f -name package-lock.json -exec rm -f '{}' +",
+    "build": "yarn workspaces run build",
+    "start:gateway": "yarn workspace api-gateway start",
+    "start:auth": "yarn workspace auth start",
+    "start:users": "yarn workspace users start",
+    "start:tokens": "yarn workspace tokens start",
+    "dev": "concurrently \"yarn workspace api-gateway start:dev\" \"yarn workspace auth start:dev\" \"yarn workspace users start:dev\" \"yarn workspace tokens start:dev\"",
+    "prisma:generate": "yarn workspace users prisma:generate",
+    "prisma:migrate": "yarn workspace users prisma:migrate",
+    "reset": "yarn clean:all && yarn install && yarn build && yarn prisma:generate"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "@nestjs/common": "^11.0.11",
+    "@nestjs/config": "^4.0.1",
+    "@nestjs/core": "^11.0.11",
+    "@nestjs/microservices": "^11.0.11",
+    "@nestjs/platform-express": "^11.0.11"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.2",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.13.10",
+    "@nestjs/cli": "^11.0.5",
+    "concurrently": "^9.1.2"
+  },
+  "license": "MIT"
+}
