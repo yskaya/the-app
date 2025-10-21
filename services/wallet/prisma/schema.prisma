@@ -1,7 +1,7 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  output        = "../node_modules/.prisma/client"
   binaryTargets = ["native", "darwin", "darwin-arm64", "linux-arm64-openssl-3.0.x"]
-  output = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -10,13 +10,13 @@ datasource db {
 }
 
 model Wallet {
-  id              String        @id @default(uuid())
-  userId          String        @unique
-  address         String        @unique
-  encryptedKey    String        // Encrypted private key
-  network         String        @default("sepolia")
-  createdAt       DateTime      @default(now())
-  transactions    Transaction[]
+  id           String        @id @default(uuid())
+  userId       String        @unique
+  address      String        @unique
+  encryptedKey String
+  network      String        @default("sepolia")
+  createdAt    DateTime      @default(now())
+  transactions Transaction[]
 
   @@index([userId])
   @@index([address])
@@ -24,24 +24,24 @@ model Wallet {
 }
 
 model Transaction {
-  id            String   @id @default(uuid())
-  walletId      String
-  wallet        Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
-  type          String   // send/receive
-  from          String
-  to            String
-  amount        String
-  txHash        String   @unique
-  status        String   // pending/completed/failed
-  blockNumber   Int?
-  gasUsed       String?
-  gasPrice      String?
-  nonce         Int
-  createdAt     DateTime @default(now())
+  id          String   @id @default(uuid())
+  walletId    String
+  type        String
+  from        String
+  to          String
+  amount      String
+  txHash      String
+  status      String
+  blockNumber Int?
+  gasUsed     String?
+  gasPrice    String?
+  nonce       Int
+  createdAt   DateTime @default(now())
+  wallet      Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
 
+  @@unique([walletId, txHash])
   @@index([walletId])
   @@index([txHash])
   @@index([status])
   @@map("transactions")
 }
-

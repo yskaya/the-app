@@ -99,6 +99,12 @@ export class WalletService {
       const balance = await this.provider.getBalance(wallet.address);
       const balanceEth = ethers.formatEther(balance);
 
+      // Sync any existing transactions for this address (important for imported wallets)
+      console.log(`🔄 Performing initial transaction sync for new wallet...`);
+      this.syncIncomingTransactions(userId).catch(err => {
+        console.error('Error during initial sync:', err.message);
+      });
+
       return {
         id: dbWallet.id,
         userId: dbWallet.userId,
@@ -226,7 +232,8 @@ export class WalletService {
       await this.redisService.del(cacheKey);
 
       // Wait for confirmation in background (don't block response)
-      this.waitForConfirmation(dbTx.id, tx.hash).catch(err => {
+      // After confirmation, it will auto-sync the recipient wallet
+      this.waitForConfirmation(dbTx.id, tx.hash, to).catch(err => {
         console.error('Error waiting for confirmation:', err);
       });
 
@@ -251,7 +258,7 @@ export class WalletService {
   /**
    * Wait for transaction confirmation (runs in background)
    */
-  private async waitForConfirmation(transactionId: string, txHash: string) {
+  private async waitForConfirmation(transactionId: string, txHash: string, recipientAddress?: string) {
     try {
       const receipt = await this.provider.waitForTransaction(txHash, 1); // Wait for 1 confirmation
 
@@ -265,6 +272,14 @@ export class WalletService {
             gasPrice: receipt.gasPrice?.toString() || '0',
           },
         });
+
+        // After confirmation, sync recipient's wallet so they see the incoming transaction immediately
+        if (recipientAddress && receipt.status === 1) {
+          console.log(`✅ TX confirmed! Syncing recipient wallet now...`);
+          this.syncIncomingTransactionsForAddress(recipientAddress).catch(err => {
+            console.log(`Recipient sync failed (normal if they don't have account): ${err.message}`);
+          });
+        }
       }
     } catch (error) {
       console.error('Error confirming transaction:', error);
@@ -351,6 +366,39 @@ export class WalletService {
   }
 
   /**
+   * Sync incoming transactions for wallet by address (used when we only know recipient address)
+   */
+  private async syncIncomingTransactionsForAddress(address: string) {
+    // Normalize address to match database format (ethers uses checksummed addresses)
+    const normalizedAddress = ethers.getAddress(address); // Converts to checksummed format
+    
+    // Try exact match first
+    let wallet = await this.prisma.wallet.findUnique({
+      where: { address: normalizedAddress },
+    });
+
+    // If not found, try case-insensitive search
+    if (!wallet) {
+      const wallets = await this.prisma.wallet.findMany({
+        where: {
+          address: {
+            equals: address,
+            mode: 'insensitive' as any,
+          },
+        },
+      });
+      wallet = wallets[0];
+    }
+
+    if (!wallet) {
+      throw new Error('Wallet not found for address');
+    }
+
+    console.log(`🔄 Triggering instant sync for recipient wallet ${wallet.address.slice(0, 10)}...`);
+    return this.syncIncomingTransactions(wallet.userId);
+  }
+
+  /**
    * Sync incoming transactions from blockchain for a wallet
    * Scans blockchain history and adds missing receive transactions
    */
@@ -374,18 +422,88 @@ export class WalletService {
       });
 
       const existingHashes = new Set(existingTxHashes.map(tx => tx.txHash));
+      console.log(`📊 Wallet ${wallet.address.slice(0, 10)} has ${existingHashes.size} existing transactions`);
 
-      // For now, we'll rely on manual sync or webhook notifications
-      // A production implementation would:
-      // 1. Use Etherscan API to get transaction history
-      // 2. Filter for incoming transactions
-      // 3. Add missing ones to database
+      // Fetch from Blockscout API (official Sepolia explorer - no API key needed!)
+      console.log(`📡 Fetching transactions from Blockscout for ${wallet.address.slice(0, 10)}...`);
 
-      return {
-        message: 'Incoming transaction sync completed',
-        wallet: wallet.address,
-        existingTransactions: existingHashes.size,
-      };
+      try {
+        const response = await fetch(
+          `https://eth-sepolia.blockscout.com/api?module=account&action=txlist&address=${wallet.address}&startblock=0&endblock=99999999&sort=asc`
+        );
+        
+        const data = await response.json();
+        
+        if (data.status !== '1' || !data.result || !Array.isArray(data.result)) {
+          console.log('⚠️  Blockscout API error:', data.message || 'Unknown error');
+          return {
+            message: 'Sync completed - no transactions or API error',
+            wallet: wallet.address,
+            newTransactions: 0,
+          };
+        }
+
+        console.log(`Found ${data.result.length} total transactions`);
+
+        // Filter for incoming transactions only
+        const incoming = data.result.filter((tx: any) => 
+          tx.to?.toLowerCase() === wallet.address.toLowerCase() &&
+          tx.from?.toLowerCase() !== wallet.address.toLowerCase() &&
+          tx.isError === '0'
+        );
+
+        console.log(`Found ${incoming.length} incoming transactions`);
+
+      // Insert missing incoming transactions
+      let newCount = 0;
+      for (const tx of incoming) {
+        if (!existingHashes.has(tx.hash)) {
+          try {
+            await this.prisma.transaction.create({
+              data: {
+                walletId: wallet.id,
+                type: 'receive',
+                from: tx.from,
+                to: tx.to,
+                amount: ethers.formatEther(tx.value),
+                txHash: tx.hash,
+                status: 'completed',
+                blockNumber: parseInt(tx.blockNumber),
+                gasUsed: tx.gasUsed,
+                gasPrice: tx.gasPrice,
+                nonce: parseInt(tx.nonce),
+              },
+            });
+            newCount++;
+            console.log(`✅ Added incoming: ${ethers.formatEther(tx.value)} ETH from ${tx.from.slice(0, 10)}...`);
+          } catch (error: any) {
+            // Skip if duplicate (might have been added by another process)
+            if (error.code === 'P2002') {
+              console.log(`⏭️  Skipping duplicate transaction: ${tx.hash.slice(0, 12)}...`);
+            } else {
+              throw error;
+            }
+          }
+        }
+      }
+
+        console.log(`🎉 Sync complete: ${newCount} new, ${incoming.length} total incoming`);
+
+        return {
+          message: 'Sync completed',
+          wallet: wallet.address,
+          newTransactions: newCount,
+          totalIncoming: incoming.length,
+        };
+
+      } catch (error: any) {
+        console.error(`❌ Error fetching from Etherscan:`, error.message);
+        return {
+          message: 'Sync completed with errors',
+          wallet: wallet.address,
+          newTransactions: 0,
+        };
+      }
 
     } catch (error) {
       if (error instanceof NotFoundException) {
