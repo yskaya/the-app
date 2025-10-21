@@ -14,9 +14,12 @@
     "start:auth": "yarn workspace auth start",
     "start:users": "yarn workspace users start",
     "start:tokens": "yarn workspace tokens start",
-    "dev": "concurrently \"yarn workspace api-gateway start:dev\" \"yarn workspace auth start:dev\" \"yarn workspace users start:dev\" \"yarn workspace tokens start:dev\"",
-    "prisma:generate": "yarn workspace users prisma:generate",
-    "prisma:migrate": "yarn workspace users prisma:migrate",
+    "start:contacts": "yarn workspace contacts start",
+    "start:wallet": "yarn workspace wallet start",
+    "dev": "concurrently -n \"gateway,auth,users,tokens,contacts,wallet\" -c \"blue,green,yellow,magenta,cyan,white\" \"yarn workspace api-gateway start:dev\" \"yarn workspace auth start:dev\" \"yarn workspace users start:dev\" \"yarn workspace tokens start:dev\" \"yarn workspace contacts start:dev\" \"yarn workspace wallet start:dev\"",
+    "dev:core": "concurrently -n \"gateway,auth,users\" -c \"blue,green,yellow\" \"yarn workspace api-gateway start:dev\" \"yarn workspace auth start:dev\" \"yarn workspace users start:dev\"",
+    "prisma:generate": "yarn workspace users prisma:generate && yarn workspace contacts prisma:generate && yarn workspace wallet prisma:generate",
+    "prisma:migrate": "yarn workspace users prisma:migrate && yarn workspace contacts prisma:migrate && yarn workspace wallet prisma:migrate",
     "reset": "yarn clean:all && yarn install && yarn build && yarn prisma:generate"
   },
   "dependencies": {

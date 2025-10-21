@@ -18,6 +18,13 @@ export class RateLimitMiddleware implements NestMiddleware {
     const clientId = this.getClientId(req);
     const endpoint = req.originalUrl;
     
+    // 🔧 Skip rate limiting in development for auth endpoints
+    const isDevelopment = process.env.NODE_ENV !== 'production';
+    if (isDevelopment && endpoint.startsWith('/api/auth/')) {
+      console.log(`[Rate Limit] SKIPPED (development mode): ${req.method} ${endpoint}`);
+      return next();
+    }
+    
     console.log(`[Rate Limit] Processing request: ${req.method} ${endpoint} from ${clientId}`);
     
     // Different rate limits for different endpoints
@@ -71,7 +78,11 @@ export class RateLimitMiddleware implements NestMiddleware {
   private getRateLimits(endpoint: string): { requests: number; windowMs: number } {
     // Stricter limits for auth endpoints
     if (endpoint.startsWith('/api/auth/login')) {
-      return { requests: 5, windowMs: 15 * 60 * 1000 }; // 5 attempts per 15 minutes
+      // 🔧 Development: Much higher limit for testing (default to dev mode if not set)
+      const isDevelopment = process.env.NODE_ENV !== 'production';
+      return isDevelopment 
+        ? { requests: 1000, windowMs: 60 * 1000 } // DEV: 1000 attempts per minute (basically unlimited)
+        : { requests: 5, windowMs: 15 * 60 * 1000 }; // PROD: 5 attempts per 15 minutes
     }
     
     if (endpoint.startsWith('/api/auth/logout')) {
@@ -105,11 +116,16 @@ export class RateLimitMiddleware implements NestMiddleware {
     const window = Math.floor(Date.now() / limits.windowMs);
     const windowKey = `${key}:${window}`;
     
-    // Get current count
-    const current = await this.redisService.get(windowKey);
-    const count = current ? parseInt(current, 10) : 0;
+    // Increment counter first
+    const pipeline = this.redisService.pipeline();
+    pipeline.incr(windowKey);
+    pipeline.expire(windowKey, Math.ceil(limits.windowMs / 1000));
+    const results = await pipeline.exec();
     
-    if (count >= limits.requests) {
+    // Get the new count after increment
+    const newCount = results?.[0]?.[1] as number || 1;
+    
+    if (newCount > limits.requests) {
       // Rate limit exceeded
       const nextWindow = window + 1;
       const resetTime = nextWindow * limits.windowMs;
@@ -123,15 +139,9 @@ export class RateLimitMiddleware implements NestMiddleware {
       };
     }
     
-    // Increment counter
-    const pipeline = this.redisService.pipeline();
-    pipeline.incr(windowKey);
-    pipeline.expire(windowKey, Math.ceil(limits.windowMs / 1000));
-    await pipeline.exec();
-    
     return {
       allowed: true,
-      remaining: limits.requests - count - 1,
+      remaining: limits.requests - newCount,
       resetTime: (window + 1) * limits.windowMs,
     };
   }

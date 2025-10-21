@@ -1,0 +1,49 @@
+{
+  "name": "wallet",
+  "version": "1.0.0",
+  "description": "Wallet Service",
+  "main": "dist/main.js",
+  "scripts": {
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "build": "nest build",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
+    "clean": "rm -rf node_modules yarn.lock dist",
+    "reset": "yarn clean && yarn install && yarn build",
+    "prisma:generate": "npx prisma generate",
+    "prisma:migrate": "npx prisma migrate dev",
+    "prisma:seed": "ts-node prisma/seed.ts"
+  },
+  "dependencies": {
+    "@paypay/redis": "*",
+    "@nestjs/common": "^11.0.11",
+    "@nestjs/core": "^11.0.11",
+    "@nestjs/config": "^4.0.1",
+    "@nestjs/platform-express": "^11.0.11",
+    "@prisma/client": "^6.5.0",
+    "ethers": "^6.10.0",
+    "cookie-parser": "^1.4.7",
+    "express-rate-limit": "^7.1.5",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11.0.0",
+    "@nestjs/schematics": "^11.0.0",
+    "@nestjs/testing": "^11.0.11",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.2",
+    "@types/jest": "^29.5.0",
+    "@types/supertest": "^6.0.0",
+    "@types/cookie-parser": "^1.4.7",
+    "jest": "^29.5.0",
+    "prisma": "^6.5.0",
+    "supertest": "^6.3.0",
+    "ts-jest": "^29.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
+  }
+}
+

@@ -21,7 +21,7 @@ export class AuthController {
     const tokensResponse = await axios.post('http://localhost:5003/api/tokens/generate', { userId: user.id });
     const tokens = tokensResponse.data;
 
-    this.setCookies(res, tokens);
+    this.setCookies(res, tokens, user.id);
 
     return res.json({ user, tokens });
   }
@@ -43,10 +43,11 @@ export class AuthController {
     
     res.clearCookie('access_token');
     res.clearCookie('refresh_token');
+    res.clearCookie('user_id');
     return res.status(200).json({ message: 'Logged out' });
   }
 
-  private setCookies(res: Response, tokens: { accessToken: string; refreshToken: string }) {
+  private setCookies(res: Response, tokens: { accessToken: string; refreshToken: string }, userId: string) {
     res.cookie("access_token", tokens.accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -56,6 +57,14 @@ export class AuthController {
 
     res.cookie("refresh_token", tokens.refreshToken, {
       httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days
+    });
+
+    // Set user_id cookie for wallet and other services (not httpOnly so frontend can read)
+    res.cookie("user_id", userId, {
+      httpOnly: false, // Frontend needs to read this
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days
